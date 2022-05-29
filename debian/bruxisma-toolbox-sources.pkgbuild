@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Maintainer: Izzy Muerte <@>
+pkgname=bruxisma-toolbox-sources
+pkgver=1
+pkgrel=1
+pkgdesc="APT Repository Configuration for Izzy Muerte (aka, bruxisma)"
+arch=('all')
+depends=('ca-certificates' 'apt-transport-https')
+
+declare -ga repositories=(
+  "docker" 
+  "github-cli"
+  "kitware"
+  "kubernetes"
+  "llvm-toolchain"
+)
+declare -gA armored_keys=(
+  [docker]="https://download.docker.com/linux/debian/gpg"
+  [kitware]="https://apt.kitware.com/keys/kitware-archive-latest.asc"
+  [llvm-toolchain]="https://apt.llvm.org/llvm-snapshot.gpg.key"
+)
+declare -gA binary_keys=(
+  [github-cli]="https://cli.github.com/packages/githubcli-archive-keyring.gpg"
+  [kubernetes]="https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+)
+
+declare -g current=$(dirname -- "${BASH_SOURCE[0]}")
+declare -g sources_list_d=etc/apt/sources.list.d
+declare -g trusted_gpg_d=etc/apt/trusted.gpg.d
+
+export distribution=$(lsb_release -cs)
+export MAKEDEB_DISTRO_CODENAME
+
+package() {
+  mkdir --parents "${pkgdir}/${sources_list_d}" "${pkgdir}/${trusted_gpg_d}"
+  makedeb --msg "Downloading Armored GPG Keys"
+  for key in "${!armored_keys[@]}"; do
+    declare url="${armored_keys[${key}]}"
+    makedeb --msg2 "${url}"
+    curl -sfSL "${url}" -o "${pkgdir}/${trusted_gpg_d}/${key}.asc"
+  done
+
+  makedeb --msg "Downloading Binary GPG keys"
+  for key in "${!binary_keys[@]}"; do
+    declare url="${binary_keys[${key}]}"
+    makedeb --msg2 "${url}"
+    curl -sfSL "${url}" -o "${pkgdir}/${trusted_gpg_d}/${key}.gpg"
+  done
+
+  makedeb --msg "Installing APT Repository Sources"
+  for repository in "${repositories[@]}"; do
+    makedeb --msg2 "${repository}.sources"
+    envsubst < "${current}/sources/${repository}.sources.in" > "${pkgdir}/${sources_list_d}/${repository}.sources"
+  done
+}

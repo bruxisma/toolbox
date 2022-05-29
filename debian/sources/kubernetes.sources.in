@@ -1,0 +1,5 @@
+Types: deb
+URIs: https://apt.kubernetes.io/
+Suites: kubernetes-xenial
+Components: main
+Architectures: amd64

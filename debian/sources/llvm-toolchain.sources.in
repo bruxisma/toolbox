@@ -1,0 +1,4 @@
+Types: deb deb-src
+URIs: https://apt.llvm.org/${MAKEDEB_DISTRO_CODENAME}
+Suites: llvm-toolchain-${MAKEDEB_DISTRO_CODENAME}
+Components: main

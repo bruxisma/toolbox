@@ -1,0 +1,4 @@
+Types: deb
+URIs: https://apt.kitware.com/ubuntu/
+Suites: ${MAKEDEB_DISTRO_CODENAME}
+Components: main
